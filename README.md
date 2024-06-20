@@ -13,7 +13,7 @@ It would help if you had these installed in your system before running this engi
 
 ## How to run it
 - Download all the files (only engine.py)
-- Use this syntax `from <file location of engine.py> import NVal` to import it into your code
+- Use this syntax `from <file location of engine.py> import *` to import it into your code
 - You can also see the tests I run on the engine in `test.py`
 
 ## Features added till now (with backpropagation)
