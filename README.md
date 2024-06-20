@@ -1,12 +1,12 @@
 ### Neugrad
 ![logo](logo.png "neugrad")
 
-This is a small autograd engine, made purely from numpy and python. This is still a work in progress and more features will be added with time
+This is a small autograd engine, made purely from numpy and python. This is still a work in progress and morre features will be added with time
 Hope you have fun implementing this :)
 
 ## Requirements to run it
 
-It would be best if you had these installed in your system before running this engine
+You need to have these installed in your system before running this engine
 - Numpy
 - Typing
 - Python (version 3.7+)
