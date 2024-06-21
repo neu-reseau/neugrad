@@ -22,6 +22,7 @@ It would help if you had these installed in your system before running this engi
 - Addition
 - Subtraction
 - Negative of Tensor
+- Tensor Power (Aᴮ)
 
 
 
