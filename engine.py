@@ -46,6 +46,32 @@ class NVal:
     def __sub__(self,other):
         out=Add()
         return out.forprop(self,-other)
+    
+    def __pow__(self,other):
+        out=Pow()
+        return out.forprop(self,other)
+    
+
+class Pow():
+    def forprop(self,p,q):
+        req_grad=p.req_grad
+        data=p._data**q._data
+        k=NVal(data,req_grad=req_grad,op=self)
+        p.children.append(k)
+        self.cache=(p,q)
+        return k
+    def backprop(self,dk,k):
+        p,q=self.cache
+        if p.req_grad:
+            dp=dk*(q._data*p._data**(q._data-1))
+            grad_dim=len(dk.shape)
+            p_dim=len(p.shape)
+            for _  in range(grad_dim-p_dim):
+                dp=dp.sum(axis=0)
+            for n,dim in enumerate(p.shape):
+                if dim==1:
+                    dp=dp.su(axis=n,keepdims=True)
+            p.backprop(dp,k)
 
     
 class Neg():
