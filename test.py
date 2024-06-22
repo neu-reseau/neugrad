@@ -10,9 +10,12 @@ d=NVal(3)
 # print(a+b)
 # print(-a)
 # print(a-b)
-print(c)
-print(d)
-print(c**d)
+print("c ",c)
+print("d ",d)
+print("c+d ",c+d)
+print("c-d ",c-d)
+print("c*d ",c*d)
+print("c^d ",c**d)
 
 # k=(a+b);req_grad=True
 # l=a-k;req_grad=True
