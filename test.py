@@ -18,6 +18,7 @@ print("c-d ",c-d)
 print("c*d ",c*d)
 print("c^d ",c**d)
 print("c/d ",c/d)
+print("a/c ",a/c)
 # print("c/e ",c/e)
 
 # k=(a+b);req_grad=True

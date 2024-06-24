@@ -3,6 +3,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 
+#helper funcs
+def list(data):
+    if isinstance(data,List):
+        return data
+    else:
+        return data.tolist()
+def array(data):
+    if isinstance(data,np.ndarray):
+        return data
+    elif isinstance(data,NVal):
+        return data.toarray()
+    else:
+        return np.array(data)
+def nval(data):
+    if isinstance(data,NVal):
+        return data
+    else:
+        return NVal(data)
+
 class NVal:
     def __init__(self,data,req_grad=False,op=None) -> None:
         self._data=np.array(data)
@@ -41,7 +60,7 @@ class NVal:
     
     def __add__(self,other):
         out=Add()
-        return out.forprop(self,other)
+        return out.forprop(self,nval(other))
     
     def __sub__(self,other):
         out=Add()
@@ -49,15 +68,31 @@ class NVal:
     
     def __pow__(self,other):
         out=Pow()
-        return out.forprop(self,other)
+        return out.forprop(self,nval(other))
     
     def __mul__(self,other):
         out=Mul()
-        return out.forprop(self,other)
+        return out.forprop(self,nval(other))
     
     def __truediv__(self,other):
         out=Div()
-        return out.forprop(self,other)
+        return out.forprop(self,nval(other))
+    
+class Exp():
+    def forprop(self,x):
+        req_grad=x.req_grad
+        data=np.exp(x._data)
+        k=NVal(data,req_grad=req_grad,op=self)
+        self.parents(x,)
+        x.children.append(k)
+        self.cache=x
+        return k
+    def backprop(self,dk,k):
+        x=self.cache
+        e=np.exp(x._data)
+        if x.req_grad:
+            dx=e*dk
+            x.backprop(dx,k)
     
 class Div():
     def forprop(self,p,q):
@@ -96,7 +131,7 @@ class Div():
             q.backprop(dq,k)
 
 
-class Mul():
+class Mul:
     def forprop(self,p,q):
         req_grad=p.req_grad or q.req_grad
         data=p._data*q._data
@@ -129,7 +164,7 @@ class Mul():
                     dq=dq.sum(axis=n,keepdims=True)    
             q.backprop(dq,k)
 
-class Pow():
+class Pow:
     def forprop(self,p,q):
         req_grad=p.req_grad
         data=p._data**q._data
@@ -151,7 +186,7 @@ class Pow():
             p.backprop(dp,k)
 
     
-class Neg():
+class Neg:
     def forprop(self,p):
         req_grad=p.req_grad
         data=-p._data
