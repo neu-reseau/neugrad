@@ -78,7 +78,34 @@ class NVal:
         out=Div()
         return out.forprop(self,nval(other))
     
-class Exp():
+    def max(self,dim=-1,keepdims=False):
+        out=Max()
+        return out.forprop(self,dim,keepdims=keepdims)
+    
+class Max:
+    def forprop(self,a,dim,keepdims=False):
+        data=np.max(a._data,axis=dim,keepdims=keepdims)
+        req_grad=a.req_grad
+        if keepdims:
+            data=np.ones(a.shape)*data
+        k=NVal(data,req_grad=req_grad,op=self)    
+        self.parents(a,)
+        a.children.append(k)
+        self.cache=(a,data,dim)
+        return k
+    def backprop(self,dk,k):
+        a,data,dim=self.cache
+        if a.req_grad:
+            max=data
+            if a.shape!=dk.shape:
+                dk=np.expand_dims(dk,axis=dim)
+                dk=dk*np.ones_like(a._data)
+                max=np.expand_dims(data,axis=dim)
+                max=max*np.ones_like(a._data)
+        da=dk*np.equal(a._data,max)
+        a.backprop(da,k)
+
+class Exp:
     def forprop(self,x):
         req_grad=x.req_grad
         data=np.exp(x._data)
