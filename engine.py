@@ -82,6 +82,37 @@ class NVal:
         out=Max()
         return out.forprop(self,dim,keepdims=keepdims)
     
+    def __matmul__(self,other):
+        out=MatMul()
+        return out.forprop(self,nval(other))
+    
+class MatMul:
+    def forprop(self,p,q):
+        req_grad=p.req_grad or q.req_grad
+        data=p._data@q._data
+        k=NVal(data,req_grad=req_grad,op=self)
+        self.parents=(p,q)
+        p.children.append(k)
+        q.children.append(k)
+        self.cache=(p,q)
+        return k
+    def backprop(self,dk,k):
+        p,q=self.cache
+        if p.req_grad:
+            dp=dk@q._data.swapaxes(-1,-2)
+            grad_dim=len(dp.shape)
+            p_dim=len(p.shape)
+            for _ in range(grad_dim-p_dim):
+                dp=dp.sum(axis=0)
+            p.backprop(dp,k)
+        if q.req_grad:
+            dq=q._data.swapaxes(-1,-2)@dk
+            grad_dim=len(dq.shape)
+            q_dim=len(q.shape)
+            for _ in range(grad_dim-q_dim):
+                dq=dq.sum(axis=0)
+            q.backprop(dq,k)
+    
 class Max:
     def forprop(self,a,dim,keepdims=False):
         data=np.max(a._data,axis=dim,keepdims=keepdims)
@@ -121,7 +152,7 @@ class Exp:
             dx=e*dk
             x.backprop(dx,k)
     
-class Div():
+class Div:
     def forprop(self,p,q):
         req_grad=p.req_grad or q.req_grad
         data=p._data/q._data
@@ -237,7 +268,7 @@ class Add:
         self.parents=(p,q)
         p.children.append(k)
         q.children.append(k)
-        self.cache=p,q
+        self.cache=(p,q)
         return k
     def backprop(self,dk,k):
         p,q=self.cache
