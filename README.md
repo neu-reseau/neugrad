@@ -26,6 +26,8 @@ It would help if you had these installed in your system before running this engi
 - Scalar Multiplication
 - Scalar Division
 - Exp Function
+- Max Function
+- MatMul Function
 - Helper Functions
 
 
