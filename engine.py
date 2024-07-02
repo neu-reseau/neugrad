@@ -21,6 +21,8 @@ def nval(data):
         return data
     else:
         return NVal(data)
+    
+#main tensor class (NVal)
 
 class NVal:
     def __init__(self,data,req_grad=False,op=None) -> None:
@@ -78,6 +80,10 @@ class NVal:
         out=Div()
         return out.forprop(self,nval(other))
     
+    def exp(self):
+        out=Exp()
+        return out.forprop(self)
+    
     def max(self,dim=-1,keepdims=False):
         out=Max()
         return out.forprop(self,dim,keepdims=keepdims)
@@ -86,11 +92,51 @@ class NVal:
         out=MatMul()
         return out.forprop(self,nval(other))
     
+    def __gt__(self,other):
+        return self._data>array(other)
+    
+    def mean(self,dim=-1,keepdims=False):
+        op=Mean()
+        return op.forprop(self,dim,keepdims=keepdims)
+    
+    def transpose(self,*dims):
+        op=Transpose()
+        return op.forprop(self, *dims)
+
+#Operation Classes
+class Transpose:
+    def forprop(self,p,*dims):
+        forp=p._data.swapaxes(*dims)
+        k=NVal(forp,req_grad=p.req_grad,op=self)
+        self.parents=(p,)
+        p.children.append(k)
+        self.cache=(p,dims)
+        return k
+    def backprop(self,dk,k):
+        p,dims=self.cache
+        if p.req_grad:
+            dp=dk.swapaxes(dims)
+            p.backprop(dp,k)
+
+class Mean:
+    def forprop(self,p,dim,keepdims):
+        forp=p._data.mean(axis=dim,keepdims=keepdims)
+        k=NVal(forp,req_grad=p.req_grad,op=self)
+        self.parents=(p,)
+        p.children.append(k)
+        self.cache=(p,dim)
+        return k
+    def backprop(self,dk,k):
+        p,dim=self.cache
+        if p.req_grad:
+            dp=np.ones(p.shape)*dk
+            dp=dp/(np.prod(np.array(p.shape)[dim]))
+            p.backprop(dp,k)
+    
 class MatMul:
     def forprop(self,p,q):
-        req_grad=p.req_grad or q.req_grad
-        data=p._data@q._data
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=p._data@q._data
+        k=NVal(forp,req_grad=(p.req_grad or q.req_grad),op=self)
         self.parents=(p,q)
         p.children.append(k)
         q.children.append(k)
@@ -114,33 +160,31 @@ class MatMul:
             q.backprop(dq,k)
     
 class Max:
-    def forprop(self,a,dim,keepdims=False):
-        data=np.max(a._data,axis=dim,keepdims=keepdims)
-        req_grad=a.req_grad
+    def forprop(self,p,dim,keepdims=False):
+        forp=np.max(p._data,axis=dim,keepdims=keepdims)
         if keepdims:
-            data=np.ones(a.shape)*data
-        k=NVal(data,req_grad=req_grad,op=self)    
-        self.parents(a,)
-        a.children.append(k)
-        self.cache=(a,data,dim)
+            forp=np.ones(p.shape)*forp
+        k=NVal(forp,req_grad=p.req_grad,op=self)    
+        self.parents(p,)
+        p.children.append(k)
+        self.cache=(p,forp,dim)
         return k
     def backprop(self,dk,k):
-        a,data,dim=self.cache
-        if a.req_grad:
-            max=data
-            if a.shape!=dk.shape:
+        p,forp,dim=self.cache
+        if p.req_grad:
+            max=forp
+            if p.shape!=dk.shape:
                 dk=np.expand_dims(dk,axis=dim)
-                dk=dk*np.ones_like(a._data)
-                max=np.expand_dims(data,axis=dim)
-                max=max*np.ones_like(a._data)
-        da=dk*np.equal(a._data,max)
-        a.backprop(da,k)
+                dk=dk*np.ones_like(p._data)
+                max=np.expand_dims(forp,axis=dim)
+                max=max*np.ones_like(p._data)
+        dp=dk*np.equal(p._data,max)
+        p.backprop(dp,k)
 
 class Exp:
     def forprop(self,x):
-        req_grad=x.req_grad
-        data=np.exp(x._data)
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=np.exp(x._data)
+        k=NVal(forp,req_grad=x.req_grad,op=self)
         self.parents(x,)
         x.children.append(k)
         self.cache=x
@@ -154,11 +198,10 @@ class Exp:
     
 class Div:
     def forprop(self,p,q):
-        req_grad=p.req_grad or q.req_grad
-        data=p._data/q._data
+        forp=p._data/q._data
         if q._data==0:
             raise Exception("You cannot divide by zero")
-        k=NVal(data,req_grad=req_grad,op=self)
+        k=NVal(forp,req_grad=(p.req_grad or q.req_grad),op=self)
         self.parents=(p,q)
         p.children.append(k)
         q.children.append(k)
@@ -191,9 +234,8 @@ class Div:
 
 class Mul:
     def forprop(self,p,q):
-        req_grad=p.req_grad or q.req_grad
-        data=p._data*q._data
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=p._data*q._data
+        k=NVal(forp,req_grad=(p.req_grad or q.req_grad),op=self)
         self.parents=(p,q)
         p.children.append(k)
         q.children.append(k)
@@ -224,9 +266,8 @@ class Mul:
 
 class Pow:
     def forprop(self,p,q):
-        req_grad=p.req_grad
-        data=p._data**q._data
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=p._data**q._data
+        k=NVal(forp,req_grad=p.req_grad,op=self)
         p.children.append(k)
         self.cache=(p,q)
         return k
@@ -246,9 +287,8 @@ class Pow:
     
 class Neg:
     def forprop(self,p):
-        req_grad=p.req_grad
-        data=-p._data
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=-p._data
+        k=NVal(forp,req_grad=p.req_grad,op=self)
         self.parents=(p,)
         p.children.append(k)
         self.cache=p
@@ -262,9 +302,8 @@ class Neg:
 
 class Add:
     def forprop(self,p,q):
-        req_grad=p.req_grad or q.req_grad
-        data=p._data+q._data
-        k=NVal(data,req_grad=req_grad,op=self)
+        forp=p._data+q._data
+        k=NVal(forp,req_grad=(p.req_grad or q.req_grad),op=self)
         self.parents=(p,q)
         p.children.append(k)
         q.children.append(k)
