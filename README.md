@@ -3,6 +3,8 @@
 
 This is a small autograd engine, made purely from numpy and python. This is still a work in progress and more features will be added with time
 Hope you have fun implementing this :)
+Additionally, later on, deep learning layer features, loss functions and optimizers will be added to this project.
+This aims to be a small pytorch clone
 
 ## Requirements to run it
 
