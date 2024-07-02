@@ -18,6 +18,7 @@ It would help if you had these installed in your system before running this engi
 
 ## Features added till now (with backpropagation)
 
+`Scalar and Tensor Operations`
 - Creation of Tensor (NVal)
 - Addition
 - Subtraction
@@ -28,8 +29,15 @@ It would help if you had these installed in your system before running this engi
 - Exp Function
 - Max Function
 - MatMul Function
+- Transpose
+- Mean
 - Helper Functions
+  
+`Deep Learning Operations`
+To Be Added
 
+`Loss Functions and Optimizers`
+To Be Added
 
 
 ### Please keep in mind this is a work in progress and will keep on being updated over time.
