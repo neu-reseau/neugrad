@@ -32,7 +32,19 @@ It would help if you had these installed in your system before running this engi
 - MatMul Function
 - Transpose
 - Mean
-- Helper Functions
+- Greater Than
+
+`Helper Functions`
+- Randn and Randn Like
+- Rand
+- Randint and Randint Like
+- zeros and zeros like
+- ones and ones like
+
+`Converting Functions`
+- to array
+- to NVal
+- to list
   
 `Deep Learning Operations`
 To Be Added
