@@ -28,7 +28,6 @@ It would help if you had these installed in your system before running this engi
 - Tensor Power (Aᴮ) ~ B is a scalar
 - Scalar Multiplication
 - Scalar Division
-- Exp Function
 - Max Function
 - MatMul Function
 - Transpose
