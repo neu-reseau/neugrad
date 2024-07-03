@@ -80,10 +80,6 @@ class NVal:
         out=Div()
         return out.forprop(self,nval(other))
     
-    def exp(self):
-        out=Exp()
-        return out.forprop(self)
-    
     def max(self,dim=-1,keepdims=False):
         out=Max()
         return out.forprop(self,dim,keepdims=keepdims)
