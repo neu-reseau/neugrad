@@ -52,5 +52,8 @@ To Be Added
 `Loss Functions and Optimizers`
 To Be Added
 
+# Active Bugs
+- MatMul backprop
+
 
 ### Please keep in mind this is a work in progress and will keep on being updated over time.
