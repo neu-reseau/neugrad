@@ -33,6 +33,7 @@ It would help if you had these installed in your system before running this engi
 - Transpose
 - Mean
 - Greater Than
+- Lesser Than
 
 `Helper Functions`
 - Randn and Randn Like
@@ -40,6 +41,8 @@ It would help if you had these installed in your system before running this engi
 - Randint and Randint Like
 - zeros and zeros like
 - ones and ones like
+- max and argmax
+- min and argmin
 
 `Converting Functions`
 - to array
@@ -53,7 +56,7 @@ To Be Added
 To Be Added
 
 # Active Bugs
-- MatMul backprop
+- None
 
 
 ### Please keep in mind this is a work in progress and will keep on being updated over time.
