@@ -26,19 +26,16 @@ def nval(data):
 
 class NVal:
     def __init__(self,data,req_grad=False,op=None) -> None:
-        self._data=np.array(data)
+        self._data=array(data)
         self.req_grad=req_grad
         self.op=op
-        self.children=[]
         self.shape=self._data.shape
+        self.children=[]
         if self.req_grad:
-            self.grad=np.zeros_like(data)
+            self.grad=np.zeros_like(data,dtype=np.float64)
 
     def __repr__(self) -> str:
-        return f"NVal({self._data})"
-    
-    def showval(self):
-        return self._data
+        return f"""NVal({self._data})"""
     
     def grad_zero(self):
         self.grad=np.zeros_like(self._data)
@@ -54,7 +51,9 @@ class NVal:
         if self.op:
             if not self.children:
                 self.op.backprop(self.grad,self)
-        
+    
+    def showval(self):
+        return self._data
 
     def __neg__(self):
         out=Neg()
@@ -90,6 +89,9 @@ class NVal:
     
     def __gt__(self,other):
         return self._data>array(other)
+    
+    def __lt__(self,other):
+        return self._data<array(other)
     
     def mean(self,dim=-1,keepdims=False):
         op=Mean()
@@ -148,7 +150,8 @@ class MatMul:
                 dp=dp.sum(axis=0)
             p.backprop(dp,k)
         if q.req_grad:
-            dq=q._data.swapaxes(-1,-2)@dk
+            dq=p._data.swapaxes(-1,-2)@dk
+            #dq=dk@kp._data.swapaxes(-1,-2)
             grad_dim=len(dq.shape)
             q_dim=len(q.shape)
             for _ in range(grad_dim-q_dim):
@@ -308,9 +311,9 @@ class Add:
     def backprop(self,dk,k):
         p,q=self.cache
         if p.req_grad:
+            dp=dk
             grad_dim=len(dk.shape)
             p_dim=len(p.shape)
-            dp=0
             for _ in range(grad_dim-p_dim):
                 dp=dp.sum(axis=0)
             for n,dim in enumerate(p.shape):
@@ -318,9 +321,9 @@ class Add:
                     dp=dp.sum(axis=n,keepdims=True)
             p.backprop(dp,k)
         if q.req_grad:
+            dq=dk
             grad_dim=len(dk.shape)
             q_dim=len(q.shape)
-            dq=0
             for _ in range(grad_dim-q_dim):
                 dq=dq.sum(axis=0)
             for n,dim in enumerate(q.shape):
