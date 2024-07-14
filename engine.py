@@ -179,21 +179,6 @@ class Max:
                 max=max*np.ones_like(p._data)
         dp=dk*np.equal(p._data,max)
         p.backprop(dp,k)
-
-class Exp:
-    def forprop(self,x):
-        forp=np.exp(x._data)
-        k=NVal(forp,req_grad=x.req_grad,op=self)
-        self.parents(x,)
-        x.children.append(k)
-        self.cache=x
-        return k
-    def backprop(self,dk,k):
-        x=self.cache
-        e=np.exp(x._data)
-        if x.req_grad:
-            dx=e*dk
-            x.backprop(dx,k)
     
 class Div:
     def forprop(self,p,q):
