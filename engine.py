@@ -100,8 +100,27 @@ class NVal:
     def transpose(self,*dims):
         op=Transpose()
         return op.forprop(self, *dims)
+    
+    def masked_fill(self,cond,val):
+        op=MaskedFill()
+        return op.forprop(self,array(cond),val)
 
 #Operation Classes
+    
+class MaskedFill:
+    def forprop(self,p,cond,val):
+        forp=np.where(cond,p._data,val)
+        k=NVal(forp,req_grad=p.req_grad,op=self)
+        self.parents=(p,)
+        p.children.append(k)
+        self.cache=(k,cond)
+        return k
+    def backprop(self,dk,k):
+        p,cond=self.cache
+        if p.req_grad:
+            dp=np.where(cond,dk,0)
+            p.backprop(dp,k)
+
 class Transpose:
     def forprop(self,p,*dims):
         forp=p._data.swapaxes(*dims)
@@ -179,6 +198,21 @@ class Max:
                 max=max*np.ones_like(p._data)
         dp=dk*np.equal(p._data,max)
         p.backprop(dp,k)
+
+class Exp:
+    def forprop(self,x):
+        forp=np.exp(x._data)
+        k=NVal(forp,req_grad=x.req_grad,op=self)
+        self.parents(x,)
+        x.children.append(k)
+        self.cache=x
+        return k
+    def backprop(self,dk,k):
+        x=self.cache
+        e=np.exp(x._data)
+        if x.req_grad:
+            dx=e*dk
+            x.backprop(dx,k)
     
 class Div:
     def forprop(self,p,q):
