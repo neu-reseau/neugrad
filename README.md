@@ -1,4 +1,4 @@
-### Neugrad
+# Neugrad
 ![logo](logo.png "neugrad")
 
 This is a small autograd engine, made purely from numpy and python. This is still a work in progress and more features will be added with time
@@ -50,7 +50,8 @@ It would help if you had these installed in your system before running this engi
 - to list
   
 `Deep Learning Operations`
-To Be Added
+- Linear Regression
+- Dropout
 
 `Loss Functions and Optimizers`
 To Be Added
