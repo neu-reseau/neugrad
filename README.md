@@ -35,6 +35,11 @@ It would help if you had these installed in your system before running this engi
 - Greater Than
 - Lesser Than
 
+`Activation Functions`
+- ReLU
+- Sigmoid
+- Tanh
+
 `Helper Functions`
 - Randn and Randn Like
 - Rand
