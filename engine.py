@@ -104,18 +104,6 @@ class NVal:
     def masked_fill(self,cond,val):
         op=MaskedFill()
         return op.forprop(self,array(cond),val)
-    
-    def relu(self):
-        op=ReLU()
-        return op.forprop(self)
-    
-    def sigmoid(self):
-        op=Sigmoid()
-        return op.forprop(self)
-    
-    def tanh(self):
-        op=Tanh()
-        return op.forprop(self)
 
 #Operation Classes
     
@@ -362,53 +350,3 @@ class Add:
                     dq=dq.sum(axis=n,keepdims=True)
             q.backprop(dq,k)
 
-
-class ReLU():
-    def forprop(self, p):
-        forp = p._data
-        forp[forp < 0] = 0
-        k=NVal(forp,req_grad=p.req_grad,op=self)
-        self.parents=(p,)
-        p.children.append(k)
-        self.cache=p
-        return k
-    
-    def backprop(self, dk, k):
-        p=self.cache
-        if p.req_grad:
-            dp = (p._data > 0) * dk
-            p.backprop(dp, k)
-
-
-class Sigmoid():
-    def forprop(self, p):
-        forp = (1./ (1 + np.exp(-p._data)))
-        k=NVal(forp,req_grad=p.req_grad,op=self)
-        self.parents=(p,)
-        p.children.append(k)
-        self.cache = p
-        self.out = forp
-        return k
-    
-    def backprop(self, dk, k):
-        p=self.cache
-        if p.req_grad:
-            dp = (self.out * (1. - self.out)) * dk
-            p.backprop(dp, k)
-
-
-class Tanh():
-    def forprop(self, p):
-        forp = (np.exp(2 * p._data) - 1) / (np.exp(2 * p._data) + 1)
-        k=NVal(forp,req_grad=p.req_grad,op=self)
-        self.parents=(p,)
-        p.children.append(k)
-        self.cache = p
-        self.out = forp
-        return k
-    
-    def backprop(self, dk, k):
-        p=self.cache
-        if p.req_grad:
-            dp = (1. - (self.out ** 2)) * dk
-            p.backprop(dp, k)
