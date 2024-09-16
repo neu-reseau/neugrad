@@ -58,9 +58,14 @@ It would help if you had these installed in your system before running this engi
 - Linear Regression
 - Dropout
 
-`Loss Functions and Optimizers`
+`Optimizers`
 - Adam
 - SGD
+
+`Loss Functions`
+- BCE Loss
+- MSE Loss
+- Hinge Loss
 
 # Active Bugs
 - None
