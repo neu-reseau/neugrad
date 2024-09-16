@@ -57,6 +57,8 @@ It would help if you had these installed in your system before running this engi
 `Deep Learning Operations`
 - Linear Regression
 - Dropout
+- Conv2d
+- Max2d
 
 `Optimizers`
 - Adam
