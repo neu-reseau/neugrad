@@ -1,6 +1,7 @@
 import numpy as np
 from engine import *
 from helperfunc import *
+from loss_optim_activ import *
 
 class NValModule:
     def __init__(self):
@@ -88,3 +89,26 @@ class MaxPool2d(NValModule):
                 pool_reg=x[:,:,h_start:h_end,w_start:w_end]
                 out[:,:,i,j]=pool_reg.max(axis=(2,3))
         return out
+
+class LogisticRegression(NValModule):
+    def __init__(self, input_dim: int):
+        super().__init__()
+        self.linear = Linear_Regression(input_dim, 1)
+        self.sigmoid = Sigmoid()
+    def forward(self, x):
+        return self.sigmoid(self.linear(x))
+    def predict(self, x, threshold=0.5):
+        probabilities = self.forward(x)
+        return (probabilities > threshold).astype(int)
+    def binary_cross_entropy_loss(self, y_pred, y_true):
+        epsilon = 1e-15
+        y_pred = y_pred.clip(epsilon, 1 - epsilon)
+        return -NVal.mean(y_true * NVal.log(y_pred) + (1 - y_true) * NVal.log(1 - y_pred))
+    def train_step(self, x, y, learning_rate=0.01):
+        y_pred = self.forward(x)
+        loss = self.binary_cross_entropy_loss(y_pred, y)
+        loss.backward()
+        with NVal.no_grad():
+            for param in self.parameters():
+                param -= learning_rate * param.grad
+        return loss.item()
